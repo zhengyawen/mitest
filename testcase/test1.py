@@ -4,6 +4,7 @@ from appium import webdriver
 from time import sleep
 from testcase import testclass
 import HTMLTestRunner
+import re
 import selenium
 import time
 import sys
@@ -36,12 +37,12 @@ class Dtest(unittest.TestCase):
     # 进入插件
     def test_enter(self):
         testclass.enter(self)
-        print 'good'
-        self.assertEqual(1,2)
         #退出插件
         testclass.pressBack(self)
 
+
     #滑动查看城市
+    @unittest.skip('skip')
     def test_citySlide(self):
         testclass.enter(self)
         result=True
@@ -49,7 +50,8 @@ class Dtest(unittest.TestCase):
         self.driver.find_element_by_name('世界时间').click()
         #判断是否进入了世界时间页面
         self.assertEqual(self.driver.find_element_by_id('com.inshow.watch.android:id/title_bar_title').text,'世界时间','进入世界时间失败')
-        length=len(self.driver.find_elements_by_class_name('android.widget.LinearLayout'))
+        citys=self.driver.find_elements_by_class_name('android.widget.LinearLayout')
+        length=len(citys)
 
         # 返回主页
         sleep(3)
@@ -117,10 +119,10 @@ class Dtest(unittest.TestCase):
         self.assertEqual(True,result, '添加失败')
         #返回主页
         testclass.pressBack(self)
-        testclass.swipeDown(self)
         # 退出插件
         testclass.pressBack(self)
 
+    @unittest.skip('skip')
     #时间间隔反复开关
     def test_intervalOnOff(self):
         testclass.enter(self)
@@ -136,12 +138,12 @@ class Dtest(unittest.TestCase):
         for i in range(5):
             old=testclass.switchButtonStatus(self)
             testclass.switchButtonOnOff(self)
-            sleep(3)
             new = testclass.switchButtonStatus(self)
             result = result and (old != new)
         #判断结果
-        print new
         self.assertEqual(True,result,'开关时间间隔失败')
+        # 返回主页
+        testclass.pressBack(self)
         # 退出插件
         testclass.pressBack(self)
 
@@ -158,39 +160,45 @@ class Dtest(unittest.TestCase):
         status=testclass.switchButtonStatus(self)
         if status==False:
             testclass.switchButtonOnOff(self)
+        # a= self.driver.page_source
+        # f = open("report/pagesource.txt", 'w')
+        # f.write(a)
+        # f.close()
         #进入设置
-        self.driver.find_element_by_id('com.inshow.watch.android:id/setIntervalTime').click()
+        self.driver.find_element_by_name('设置间隔时间').click()
         #设定时长
         time=20
-        print '时间间隔设置为',time
         sleep(2)
         el=self.driver.find_element_by_id('com.inshow.watch.android:id/numberpicker_input')
         original=int(el.text)
         testclass.swipeChoose(self,el,original,time)
-
-        self.driver.find_element_by_id('com.inshow.watch.android:id/ok').click()
-        sleep(3)
+        self.driver.find_element_by_name('确定').click()
 
         #判断设置结果
-        self.assertEqual(int(self.driver.find_element_by_id('com.inshow.watch.android:id/tvProgress').get_attribute('text')),time,'设定时间间隔失败'  )
+        timenow=self.driver.find_element_by_id('com.inshow.watch.android:id/tvRemindTopTip').text
+        x=re.sub("\D","",timenow)
+        self.assertEqual(int(x),time,'设定时间间隔失败'  )
 
         #判断倒计时结果
-        sleep(61)
-        now=int(self.driver.find_element_by_id('com.inshow.watch.android:id/tvProgress').get_attribute('text'))
-        self.assertNotEqual(now,time,'时间间隔倒计时失败')
+        sleep(15)
+        now=self.driver.find_element_by_id('com.inshow.watch.android:id/tvRemain').get_attribute('text')
+        self.assertNotEqual(now,"%d:59"%(time-1),'时间间隔倒计时失败')
 
         #重新计时
-        self.driver.find_element_by_id('com.inshow.watch.android:id/reset').click()
-        end= int(self.driver.find_element_by_id('com.inshow.watch.android:id/tvProgress').get_attribute('text'))
-        self.assertEqual(end, time, '时间间隔重新计时失败')
-        # 返回主页
+        self.driver.find_element_by_name('重新计时').click()
+        end= self.driver.find_element_by_id('com.inshow.watch.android:id/tvRemain').get_attribute('text')
+        # self.assertEqual(end, original, '时间间隔重新计时失败')
+        self.assertNotEqual(end, now, '设定时间间隔失败')
+        #返回主页
         testclass.pressBack(self)
-        testclass.swipeDown(self)
+
         # 退出插件
         testclass.pressBack(self)
 
+
      # @unittest.skip(u'忽略该挑用例')
     #添加闹钟
+    option = [u'只响一次', u'每天', u'法定工作日', u'法定节假日', u'周一至周五']
     def test_addAlarm(self):
         testclass.enter(self)
         # 进入闹钟设置
@@ -201,11 +209,10 @@ class Dtest(unittest.TestCase):
         self.assertEqual(self.driver.find_element_by_id('com.inshow.watch.android:id/title_bar_title').text, '闹钟',
                          '进入闹钟失败')
 
-        option = [u'只响一次', u'每天', u'法定工作日', u'法定节假日', u'周一至周五']
         #定义闹钟格式
         alarm=[
-            [option[2],u'第一个',u'下午',2,30],
-            # [option[1],u'第二个',u'上午',4,30]
+            [Dtest.option[1],u'下午',2,30],
+            # [Dtest.option[1],u'上午',4,30]
         ]
         for i in alarm:
             # 进入添加页面
@@ -213,11 +220,11 @@ class Dtest(unittest.TestCase):
             sleep(2)
             self.assertNotEqual(self.driver.page_source.find(u'设置闹钟'), -1, '进入添加闹钟页面失败')
             #设置闹钟
-            testclass.alartSetting(self, i[0], i[1], i[2], i[3], i[4])
-            print "设置闹钟" ,i[0], i[1], i[2], i[3], i[4]
+            testclass.alartSetting(self, i[0], i[1], i[2], i[3])
+            print "设置闹钟" ,i[0], i[1], i[2], i[3]
         # 返回主页
         testclass.pressBack(self)
-        testclass.swipeDown(self)
+
         # 退出插件
         testclass.pressBack(self)
 
@@ -231,11 +238,11 @@ class Dtest(unittest.TestCase):
         # 判断是否进入了闹钟页面
         self.assertEqual(self.driver.find_element_by_id('com.inshow.watch.android:id/title_bar_title').text, '闹钟',
                          '进入闹钟失败')
-        option = [u'只响一次', u'每天', u'法定工作日', u'法定节假日', u'周一至周五']
+
         # 定义闹钟格式
         alarm = [
-            [option[2], u'第一个', u'下午', 2, 30],
-            # [option[1], u'第二个', u'上午', 4, 30]
+            [Dtest.option[1], u'下午', 2, 30],
+            # [Dtest.option[1], u'上午', 4, 30]
         ]
 
         list=self.driver.find_elements_by_id('com.inshow.watch.android:id/time')
@@ -245,8 +252,8 @@ class Dtest(unittest.TestCase):
             sleep(2)
             self.assertNotEqual(self.driver.page_source.find(u'设置闹钟'), -1, '进入添加闹钟页面失败')
             # 设置闹钟
-            testclass.alartSetting(self,alarm[i][0],alarm[i][1],alarm[i][2],alarm[i][3],alarm[i][4])
-        print "设置闹钟" ,alarm[i][0],alarm[i][1],alarm[i][2],alarm[i][3],alarm[i][4]
+            testclass.alartSetting(self,alarm[i][0],alarm[i][1],alarm[i][2],alarm[i][3])
+        print "设置闹钟" ,alarm[i][0],alarm[i][1],alarm[i][2],alarm[i][3]
 
 
         # 返回主页
@@ -262,7 +269,7 @@ class Dtest(unittest.TestCase):
         testclass.enter(self)
         testclass.pressMore(self)
         #退出设置
-        testclass.pressBack(self)
+        testclass.settingBack(self)
         # 退出插件
         testclass.pressBack(self)
 
@@ -278,9 +285,8 @@ class Dtest(unittest.TestCase):
                          '进入身体信息失败')
         sleep(1)
 
-
         # 退出设置
-        testclass.pressBack(self)
+        testclass.settingBack(self)
         # 退出插件
         testclass.pressBack(self)
 
@@ -291,31 +297,27 @@ class Dtest(unittest.TestCase):
         testclass.enter(self)
         testclass.pressMore(self)
         # 进入身体信息
-        self.driver.find_element_by_name(u'设备信息').click()
-        title = self.driver.find_element_by_id('com.inshow.watch.android:id/title_bar_title').text
-        sleep(1)
-        # 判断进入设备信息是否成功
-        self.assertEqual(title, u'设备信息', '进入设备信息设置失败')
 
+        list=self.driver.find_element_by_id('com.xiaomi.smarthome:id/name')
         #修改名称
         devicesname = ['米家石英手表', '我的手表']
-        list = self.driver.find_elements_by_id('com.inshow.watch.android:id/row_value')
-        self.driver.find_element_by_name(u'名称').click()
-        sleep(1)
-        if devicesname[0]==list[0].text:
+        if devicesname[0]==list.text:
             key=devicesname[1]
         else:
             key=devicesname[0]
-        print '设置手表名为',key
-        self.driver.find_element_by_id('com.inshow.watch.android:id/input_text').send_keys(key.decode())
+        self.driver.find_element_by_name(u'重命名').click()
+        # a= self.driver.page_source
+        # f = open("report/pagesource.txt", 'w')
+        # f.write(a)
+        # f.close()
+        self.driver.find_element_by_id('com.xiaomi.smarthome:id/client_remark_input_view_edit').send_keys(key.decode())
         self.driver.find_element_by_name(u'确定').click()
         sleep(1)
         #判断是否修改成功
-        self.assertEqual(self.driver.find_element_by_id('com.inshow.watch.android:id/row_value').text,key,'修改设备名称失败')
-
+        self.assertEqual(self.driver.find_element_by_id('com.xiaomi.smarthome:id/name').text,key,'修改设备名称失败')
 
         # 退出设置
-        testclass.pressBack(self)
+        testclass.settingBack(self)
         # 退出插件
         testclass.pressBack(self)
 

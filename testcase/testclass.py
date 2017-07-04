@@ -34,11 +34,11 @@ def enter(self):
 
     self.assertEqual(u, u'.frame.plugin.runtime.activity.PluginHostActivityMain','进入插件失败')
     city = self.driver.find_element_by_id('com.inshow.watch.android:id/tv_city')
-    while (city.get_attribute('text') == u'设备连接中，请稍等...'):
+    while (city.get_attribute('text').find('设备连接中')!= -1):
         sleep(1)
-    if city.get_attribute('text') == u'连接失败，点击重试？':
+    if city.get_attribute('text').find('连接失败')!= -1:
         city.click()
-        if city.get_attribute('text') == u'连接失败，点击重试？':
+        if city.get_attribute('text')!= -1:
             self.assertEqual(0,1, '设备连接失败')
     else:
         self.assertEqual(1,1, '设备连接失败')
@@ -49,6 +49,7 @@ def addcity(self,name):
     sleep(2)
     self.driver.find_element_by_name(name).click()
     sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click( )
 
 #搜索并添加城市
 def searchCity(self,name):
@@ -59,9 +60,12 @@ def searchCity(self,name):
     sleep(2)
     self.driver.find_element_by_id('com.inshow.watch.android:id/tv_name').click()
     sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
+    sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
 
-#switchbutton开关
-def alartSetting(self,repeat,remark,apm,h,m):
+#
+def alartSetting(self,repeat,apm,h,m):
     self.driver.find_element_by_name(u'重复').click()
     sleep(3)
 
@@ -71,8 +75,8 @@ def alartSetting(self,repeat,remark,apm,h,m):
     sleep(3)
 
     # 设置备注
-    self.driver.find_element_by_id('com.inshow.watch.android:id/editText').click()
-    self.driver.find_element_by_id('com.inshow.watch.android:id/editText').send_keys(remark.decode())
+    # self.driver.find_element_by_id('com.inshow.watch.android:id/editText').click()
+    # self.driver.find_element_by_id('com.inshow.watch.android:id/editText').send_keys(remark.decode())
 
     # 设置时间
     input = self.driver.find_elements_by_id('com.inshow.watch.android:id/numberpicker_input')
@@ -110,7 +114,7 @@ def alartSetting(self,repeat,remark,apm,h,m):
 
 def switchButtonOnOff(self):
     self.driver.find_element_by_id('com.inshow.watch.android:id/switchButton').click()
-    sleep(3)
+    sleep(2)
 
 #switchbutton状态
 def switchButtonStatus(self):
@@ -164,4 +168,8 @@ def pressMore(self):
 #点击返回键
 def pressBack(self):
     self.driver.find_element_by_id('com.inshow.watch.android:id/title_bar_return').click()
+    sleep(3)
+#设置返回
+def settingBack(self):
+    self.driver.find_element_by_id('com.xiaomi.smarthome:id/module_a_3_return_btn').click()
     sleep(3)
