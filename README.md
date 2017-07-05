@@ -1,0 +1,3 @@
+# mitest
+HtmlTestRunner放入Python的lib目录下
+unittest文件夹中改写了case.py。将这个文件替换python的lib目录下。
