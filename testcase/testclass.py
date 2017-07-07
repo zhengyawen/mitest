@@ -18,38 +18,35 @@ def enter(self):
         self.driver.wait_activity('.SmartHomeMainActivity', 10, 1)
     sleep(3)
     el = self.driver.find_elements_by_id('com.xiaomi.smarthome:id/name')
-    devicesname=[u'米家石英手表',u'我的手表']
 
-    tag=0
+    #找到关键字“手表”
     for i in el:
-        for j in devicesname:
-            if i.text==j:
-                tag=1
-                i.click()
-                break
-        if tag==1:
+        if i.text.find('手表')>-1:
+            i.click()
             break
+
     sleep(2)
     u=self.driver.current_activity
-
     self.assertEqual(u, u'.frame.plugin.runtime.activity.PluginHostActivityMain','进入插件失败')
     city = self.driver.find_element_by_id('com.inshow.watch.android:id/tv_city')
-    while (city.get_attribute('text').find('设备连接中')!= -1):
+    #等待设备连接
+    while (city.get_attribute('text').find('设备连接中')> -1):
         sleep(1)
-    if city.get_attribute('text').find('连接失败')!= -1:
+    #连接失败重试一次
+    if city.get_attribute('text').find('连接失败')> -1:
         city.click()
-        if city.get_attribute('text')!= -1:
+        if city.get_attribute('text')>-1:
             self.assertEqual(0,1, '设备连接失败')
     else:
         self.assertEqual(1,1, '设备连接失败')
 #添加城市
-def addcity(self,name):
-    self.driver.find_element_by_id('com.inshow.watch.android:id/add').click()
-    self.assertNotEqual(self.driver.page_source.find(u'请选择城市'), -1, '进入选择城市页面失败')
-    sleep(2)
-    self.driver.find_element_by_name(name).click()
-    sleep(2)
-    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click( )
+# def addcity(self,name):
+#     self.driver.find_element_by_id('com.inshow.watch.android:id/add').click()
+#     self.assertNotEqual(self.driver.page_source.find(u'请选择城市'), -1, '进入选择城市页面失败')
+#     sleep(2)
+#     self.driver.find_element_by_name(name).click()
+#     sleep(2)
+#     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click( )
 
 #搜索并添加城市
 def searchCity(self,name):
@@ -64,15 +61,18 @@ def searchCity(self,name):
     sleep(2)
     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
 
-#
+#时间转化
+def int2str(t):
+    if t<10:
+        return '0'+str(t)
+    else:
+        return str(t)
+#设置闹钟
 def alartSetting(self,repeat,apm,h,m):
     self.driver.find_element_by_name(u'重复').click()
-    sleep(3)
 
     wer = self.driver.find_element_by_name(repeat)
     wer.click()
-
-    sleep(3)
 
     # 设置备注
     # self.driver.find_element_by_id('com.inshow.watch.android:id/editText').click()
@@ -80,7 +80,7 @@ def alartSetting(self,repeat,apm,h,m):
 
     # 设置时间
     input = self.driver.find_elements_by_id('com.inshow.watch.android:id/numberpicker_input')
-    sleep(1)
+
     # 设置上下午
     if (input[0].get_attribute('text') != apm) and input[0].get_attribute('text') == u'上午':
         swipeChoose(self, input[0], 1, 2)
@@ -90,25 +90,31 @@ def alartSetting(self,repeat,apm,h,m):
     # 设置小时
     hour = int(input[1].get_attribute('text'))
     swipeChoose(self, input[1], hour, h)
-    sleep(1)
+
     # 设置分钟
     minute = int(input[2].get_attribute('text'))
     swipeChoose(self, input[2], minute, m)
-    sleep(1)
+
 
     # 点击确定
     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
-    sleep(2)
-
+    sleep(3)
     # 判断结果
     if apm == u'下午':
-        settime = str(h + 12) + ":" + str(m)
+        settime = int2str(h+12) + ":" + int2str(m)
     else:
-        settime = '0' + str(h) + ":" + str(m)
-    time = self.driver.find_elements_by_id('com.inshow.watch.android:id/time')[0].text
-    week = self.driver.find_elements_by_id('com.inshow.watch.android:id/weekNum')[0].text
-    status = self.driver.find_elements_by_id('com.inshow.watch.android:id/timeLeft')[0].text
-    self.assertEqual(time, settime, '闹钟时间错误')
+        settime = int2str(h) + ":" + int2str(m)
+    # a= self.driver.page_source
+    # f = open("report/alarm-pagesource.txt", 'w')
+    # f.write(a)
+    # f.close()
+    try:
+        a=self.driver.find_element_by_xpath('//android.widget.TextView[@text="'+settime+'"]')
+    except:
+        self.assertEqual(True,False, '闹钟设置失败')
+        raise AssertionError
+    week = self.driver.find_element_by_xpath('//android.widget.TextView[@text="'+settime+'"]/following-sibling::android.widget.LinearLayout/android.widget.TextView[1]').text
+    status = self.driver.find_element_by_xpath('//android.widget.TextView[@text="'+settime+'"]/following-sibling::android.widget.LinearLayout/android.widget.TextView[2]').text
     self.assertEqual(week, repeat, '闹钟周期错误')
     self.assertEqual(status, u'已开启', '闹钟状态错误')
 
