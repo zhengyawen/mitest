@@ -6,9 +6,10 @@ from time import sleep
 import time
 
 #截图
-def screenshort(self):
-    now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time()))
-    self.driver.get_screenshot_as_file( now +".png")
+def screenshot(self):
+    now = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time()))
+    self.driver.get_screenshot_as_file( 'screenshot/'+now +".png")
+    print  'screenshot:', now, '.png'
 #进入插件
 def enter(self):
     #若不在主页面则重新进入app
@@ -48,6 +49,19 @@ def enter(self):
 #     sleep(2)
 #     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click( )
 
+#搜索并添加联系人
+def searchName(self,name):
+    self.driver.find_element_by_id('com.inshow.watch.android:id/add').click()
+    self.assertNotEqual(self.driver.page_source.find(u'请选择联系人'), -1, '进入选择联系人页面失败')
+    sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/et_search').send_keys(name.decode())
+    sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/tvName').click()
+    sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
+    sleep(2)
+    self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
+
 #搜索并添加城市
 def searchCity(self,name):
     self.driver.find_element_by_id('com.inshow.watch.android:id/add').click()
@@ -60,7 +74,6 @@ def searchCity(self,name):
     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
     sleep(2)
     self.driver.find_element_by_id('com.inshow.watch.android:id/select_all_select').click()
-
 #时间转化
 def int2str(t):
     if t<10:
@@ -114,9 +127,9 @@ def alartSetting(self,repeat,apm,h,m):
         self.assertEqual(True,False, '闹钟设置失败')
         raise AssertionError
     week = self.driver.find_element_by_xpath('//android.widget.TextView[@text="'+settime+'"]/following-sibling::android.widget.LinearLayout/android.widget.TextView[1]').text
-    status = self.driver.find_element_by_xpath('//android.widget.TextView[@text="'+settime+'"]/following-sibling::android.widget.LinearLayout/android.widget.TextView[2]').text
+    status = self.driver.find_element_by_id('com.inshow.watch.android:id/switchButton').get_attribute('checked')
     self.assertEqual(week, repeat, '闹钟周期错误')
-    self.assertEqual(status, u'已开启', '闹钟状态错误')
+    self.assertEqual(status, u'true', '闹钟状态错误')
 
 def switchButtonOnOff(self):
     self.driver.find_element_by_id('com.inshow.watch.android:id/switchButton').click()

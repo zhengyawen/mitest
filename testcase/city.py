@@ -2,7 +2,7 @@
 import unittest
 from appium import webdriver
 from time import sleep
-from testcase import testclass
+import testcase.testclass
 import HTMLTestRunner
 import re
 import selenium
@@ -37,17 +37,17 @@ class City(unittest.TestCase):
 
     # 进入插件
     def test_enter(self):
-        testclass.enter(self)
+        testcase.testclass.enter(self)
         #退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 
     #滑动查看城市
-    @unittest.skip('skip')
+    # @unittest.skip('skip')
     def test_city1(self):
-        testclass.enter(self)
+        testcase.testclass.enter(self)
         result=True
-        testclass.swipeUp(self)
+        testcase.testclass.swipeUp(self)
         self.driver.find_element_by_name('世界时间').click()
         #判断是否进入了世界时间页面
         self.assertEqual(self.driver.find_element_by_id(
@@ -57,8 +57,8 @@ class City(unittest.TestCase):
 
         # 返回主页
         sleep(3)
-        testclass.pressBack(self)
-        testclass.swipeDown(self)
+        testcase.testclass.pressBack(self)
+        testcase.testclass.swipeDown(self)
 
         #滑动城市
         if length ==1:
@@ -74,12 +74,12 @@ class City(unittest.TestCase):
                 result=result and (old !=new)
         self.assertEqual(result,True, '滑动世界城市失败')
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
     # 添加首页城市
     def test_city2(self):
-        testclass.enter(self)
-        testclass.swipeUp(self)
+        testcase.testclass.enter(self)
+        testcase.testclass.swipeUp(self)
         self.driver.find_element_by_name('世界时间').click()
         # 判断是否进入了世界时间页面
         self.assertEqual(self.driver.find_element_by_id(
@@ -109,14 +109,14 @@ class City(unittest.TestCase):
         self.assertEqual(result,True, '添加世界城市失败')
         # 返回主页
         sleep(3)
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
     # 搜索添加城市
     def test_city3(self):
-        testclass.enter(self)
-        testclass.swipeUp(self)
+        testcase.testclass.enter(self)
+        testcase.testclass.swipeUp(self)
         self.driver.find_element_by_name(u'世界时间').click()
         # 判断是否进入了世界时间页面
         self.assertEqual(self.driver.find_element_by_id(
@@ -124,7 +124,7 @@ class City(unittest.TestCase):
         keys=['巴林','巴拿马']#列表中所有想添加的城市名
 
         for key in keys:
-            testclass.searchCity(self, key)
+            testcase.testclass.searchCity(self, key)
             print '添加城市为',key
         #判断结果
         result = True
@@ -132,9 +132,9 @@ class City(unittest.TestCase):
             result = result and (self.driver.page_source.find(key) != -1)
         self.assertEqual(True,result, '添加失败')
         #返回主页
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 
 if __name__=='__main__':

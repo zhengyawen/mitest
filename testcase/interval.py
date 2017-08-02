@@ -2,7 +2,7 @@
 import unittest
 from appium import webdriver
 from time import sleep
-from testcase import testclass
+import testcase.testclass
 import HTMLTestRunner
 import re
 import selenium
@@ -36,11 +36,11 @@ class Interval(unittest.TestCase):
         print('tearDown')
 
 
-    # @unittest.skip('skip')
+    @unittest.skip('skip')
     #时间间隔反复开关
     def test_interval1(self):
-        testclass.enter(self)
-        testclass.swipeUp(self)
+        testcase.testclass.enter(self)
+        testcase.testclass.swipeUp(self)
         self.driver.find_element_by_name(u'间隔提醒').click()
         sleep(3)
         # 判断是否进入了间隔提醒页面
@@ -48,45 +48,46 @@ class Interval(unittest.TestCase):
             'com.inshow.watch.android:id/title_bar_title').text, '间隔提醒','进入间隔提醒失败')
 
         result=True
-        #反复开关5次
+        #反复开关5次,
         for i in range(5):
-            old=testclass.switchButtonStatus(self)
-            testclass.switchButtonOnOff(self)
-            new = testclass.switchButtonStatus(self)
+            old= testcase.testclass.switchButtonStatus(self)
+            testcase.testclass.switchButtonOnOff(self)
+            new = testcase.testclass.switchButtonStatus(self)
             result = result and (old != new)
         #判断结果
         self.assertEqual(True,result,'开关时间间隔失败')
         # 返回主页
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
     #设置时间间隔和重新计时
-    def test_iterval2(self):
-        testclass.enter(self)
+    def test_interval2(self):
+        testcase.testclass.enter(self)
         #进入时间间隔设置
-        testclass.swipeUp(self)
+        testcase.testclass.swipeUp(self)
         self.driver.find_element_by_name(u'间隔提醒').click()
         # 判断是否进入了间隔提醒页面
         self.assertEqual(self.driver.find_element_by_id(
             'com.inshow.watch.android:id/title_bar_title').text, '间隔提醒', '进入间隔提醒失败')
         #打开时间间隔
-        status=testclass.switchButtonStatus(self)
+        status= testcase.testclass.switchButtonStatus(self)
         if status==False:
-            testclass.switchButtonOnOff(self)
+            testcase.testclass.switchButtonOnOff(self)
         # a= self.driver.page_source
         # f = open("report/alarm-pagesource.txt", 'w')
         # f.write(a)
         # f.close()
         #进入设置
-        self.driver.find_element_by_name('设置间隔时间').click()
+        if status==True:
+            self.driver.find_element_by_name('设置间隔时间').click()
         #设定时长
         time=random.randint(1,60)
         print '设定间隔时长为',time
         sleep(2)
         el=self.driver.find_element_by_id('com.inshow.watch.android:id/numberpicker_input')
         original=int(el.text)
-        testclass.swipeChoose(self,el,original,time)
+        testcase.testclass.swipeChoose(self, el, original, time)
         self.driver.find_element_by_name('确定').click()
 
         #判断设置结果
@@ -105,10 +106,10 @@ class Interval(unittest.TestCase):
         # self.assertEqual(end, original, '时间间隔重新计时失败')
         self.assertNotEqual(end, now, '设定时间间隔失败')
         #返回主页
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 
 

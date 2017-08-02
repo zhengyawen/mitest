@@ -2,16 +2,12 @@
 import unittest
 from appium import webdriver
 from time import sleep
-from testcase import testclass
+import testcase.testclass
 import HTMLTestRunner
 import re
-import selenium
+from selenium.webdriver.support.ui import WebDriverWait
 import random
 import time
-
-
-
-
 
 
 import sys
@@ -43,9 +39,9 @@ class Setting(unittest.TestCase):
 
     # 进入插件
     def test_enter(self):
-        testclass.enter(self)
+        testcase.testclass.enter(self)
         #退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 
 
@@ -53,8 +49,9 @@ class Setting(unittest.TestCase):
     # 设置身体信息
     def test_set1(self):
         # 进入设置
-        testclass.enter(self)
-        testclass.pressMore(self)
+        print "设置身体信息"
+        testcase.testclass.enter(self)
+        testcase.testclass.pressMore(self)
         #进入身体信息
         self.driver.find_element_by_name(u'身体信息').click()
         # 判断是否进入了身体信息页面
@@ -76,8 +73,8 @@ class Setting(unittest.TestCase):
         mompicker=self.driver.find_element_by_xpath(
              '//android.widget.TextView[@text="出生年月"]/../../following-sibling::android.widget.FrameLayout/android.widget.FrameLayout'
             '/android.widget.LinearLayout/android.widget.LinearLayout/com.inshow.watch.android.view.WatchNumberPicker[2]/android.widget.EditText')
-        testclass.swipeChoose(self,yearpicker,int(yearpicker.text),dataset[0])
-        testclass.swipeChoose(self, mompicker, int(mompicker.text), dataset[1])
+        testcase.testclass.swipeChoose(self, yearpicker, int(yearpicker.text), dataset[0])
+        testcase.testclass.swipeChoose(self, mompicker, int(mompicker.text), dataset[1])
         self.driver.find_element_by_name('确定').click()
         #设置性别
         self.driver.find_element_by_name('性别').click()
@@ -85,12 +82,12 @@ class Setting(unittest.TestCase):
         #设置身高
         self.driver.find_element_by_name('身高').click()
         heigpicker=self.driver.find_element_by_id('com.inshow.watch.android:id/numberpicker_input')
-        testclass.swipeChoose(self, heigpicker,int(heigpicker.text), dataset[3])
+        testcase.testclass.swipeChoose(self, heigpicker, int(heigpicker.text), dataset[3])
         self.driver.find_element_by_name('确定').click()
         #设置体重
         self.driver.find_element_by_name('体重').click()
         weigpicker = self.driver.find_element_by_id('com.inshow.watch.android:id/numberpicker_input')
-        testclass.swipeChoose(self, weigpicker, int(weigpicker.text), dataset[4])
+        testcase.testclass.swipeChoose(self, weigpicker, int(weigpicker.text), dataset[4])
         self.driver.find_element_by_name('确定').click()
 
         #判断设置结果
@@ -105,21 +102,22 @@ class Setting(unittest.TestCase):
 
         self.assertEqual(yeardata,'%d年%d月'%(dataset[0],dataset[1]),'出生年月设置失败')
         self.assertEqual(sexdata,dataset[2],'性别设置失败')
-        self.assertEqual(heigdata,testclass.int2str(dataset[3])+'厘米','身高设置失败')
-        self.assertEqual(weigdata,testclass.int2str(dataset[4])+'公斤','体重设置失败')
+        self.assertEqual(heigdata, testcase.testclass.int2str(dataset[3]) + '厘米', '身高设置失败')
+        self.assertEqual(weigdata, testcase.testclass.int2str(dataset[4]) + '公斤', '体重设置失败')
 
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
         # 退出设置
-        testclass.settingBack(self)
+        testcase.testclass.settingBack(self)
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 
     #进入设备信息修改设备名称
     def test_set2(self):
+        print "重命名"
         # 进入设置
-        testclass.enter(self)
-        testclass.pressMore(self)
+        testcase.testclass.enter(self)
+        testcase.testclass.pressMore(self)
         # 进入身体信息
 
         list=self.driver.find_element_by_id('com.xiaomi.smarthome:id/name')
@@ -141,26 +139,66 @@ class Setting(unittest.TestCase):
         self.assertEqual(namenow,key,'修改设备名称失败')
 
         # 退出设置
-        testclass.settingBack(self)
+        testcase.testclass.settingBack(self)
         # 退出插件
-        testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
+    def test_set3(self):
+        print "查看步数"
+        # 进入设置
+        testcase.testclass.enter(self)
+        counter=self.driver.find_element_by_id('com.inshow.watch.android:id/stepCounter')
+        step=re.sub(r'\D','',counter.text)
+        counter.click()
+        sleep(3)
+        tvstep=self.driver.find_element_by_id('com.inshow.watch.android:id/tv_step')
+        steptext=re.sub(r'\D','',tvstep.text)
+        self.assertEqual(step,steptext,'步数数据有误')
+        testcase.testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
+
+    def test_set4(self):
+        print "查看步数周视图"
+        # 进入设置
+        testcase.testclass.enter(self)
+        counter=self.driver.find_element_by_id('com.inshow.watch.android:id/stepCounter')
+        counter.click()
+        sleep(3)
+        self.driver.find_element_by_name('周').click()
+        sleep(3)
+        testcase.testclass.screenshot(self)
+        testcase.testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
+
+    def test_set5(self):
+        print "查看步数月视图"
+        # 进入设置
+        testcase.testclass.enter(self)
+        counter=self.driver.find_element_by_id('com.inshow.watch.android:id/stepCounter')
+        counter.click()
+        sleep(3)
+        self.driver.find_element_by_name('月').click()
+        sleep(3)
+        testcase.testclass.screenshot(self)
+        testcase.testclass.pressBack(self)
+        testcase.testclass.pressBack(self)
 
 if __name__=='__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(Setting('test_set4'))
 
 
 
-
-    suite=unittest.TestSuite(unittest.makeSuite(Setting))
+    # suite=unittest.TestSuite(unittest.makeSuite(Setting))
     # 获取当前时间，这样便于下面的使用。
-    # now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time()))
-    # # 打开一个文件，将result写入此file中
-    # fp = open("../report/result" + now + ".html", 'wb')
-    # # 执行测试
-    #
-    # runner = HTMLTestRunner.HTMLTestRunner(stream=fp,title='test result',description=u'result:')
-    # runner.run(suite)
-    # fp.close()
+    now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time()))
+    # 打开一个文件，将result写入此file中
+    fp = open("../report/result" + now + ".html", 'wb')
+    # 执行测试
+
+    runner = HTMLTestRunner.HTMLTestRunner(stream=fp,title='test result',description=u'result:')
+    runner.run(suite)
+    fp.close()
 
 
 
